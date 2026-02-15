@@ -1,0 +1,82 @@
+body {
+    font-family: "Tahoma";
+    text-align: center;
+    background: #f4f4f4;
+    margin: 0;
+}
+
+header {
+    background: #0077b6;
+    padding: 20px;
+    color: white;
+}
+
+header h1 {
+    margin: 0;
+}
+
+.container {
+    margin-top: 40px;
+}
+
+.btn {
+    display: block;
+    margin: 15px auto;
+    padding: 12px;
+    width: 220px;
+    background: #0096c7;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.btn-privacy {
+    background: #6a4c93;
+}
+
+.form-box {
+    width: 320px;
+    margin: 30px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: right;
+}
+
+.form-box input {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+video {
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.camera-container {
+    position: relative;
+    display: inline-block;
+}
+
+#camera, #overlay {
+    width: 80%;
+    max-width: 500px;
+    border-radius: 10px;
+}
+
+#overlay {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+}
+
+#status, #counter, #feedback {
+    margin-top: 10px;
+    font-size: 18px;
+}

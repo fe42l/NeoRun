@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>الكاميرا - SmartFit Guard</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body class="bg-gray-100 p-6">
+
+<!-- زر العودة -->
+<a href="index.html" 
+   class="fixed top-4 right-4 bg-gradient-to-r from-blue-700 to-purple-700 text-white px-4 py-2 rounded-full shadow-lg hover:opacity-90 flex items-center gap-2 z-50">
+    <i class="fa-solid fa-arrow-right"></i>
+    <span>العودة</span>
+</a>
+
+<!-- اللوقو -->
+<div class="text-center mb-4">
+    <img src="assets/logo.png" class="w-20 mx-auto opacity-90">
+</div>
+
+<h2 class="text-3xl font-bold text-center mb-4 text-blue-800">
+    🎥 تتبع التمرين
+</h2>
+
+<!-- الكاميرا -->
+<div class="flex justify-center">
+    <div class="relative">
+        <video id="camera" autoplay playsinline class="rounded-xl shadow-lg"></video>
+        <canvas id="overlay" class="absolute top-0 left-0"></canvas>
+    </div>
+</div>
+
+<!-- الأزرار -->
+<div class="text-center mt-6">
+    <button onclick="startCamera()" 
+            class="bg-gradient-to-r from-blue-700 to-purple-700 text-white px-6 py-3 rounded-xl shadow hover:opacity-90">
+        <i class="fa-solid fa-play"></i> تشغيل الكاميرا
+    </button>
+</div>
+
+<!-- المعلومات -->
+<div class="mt-6 text-center">
+    <p id="status" class="text-lg font-bold text-gray-700">الحالة: لم يبدأ التتبع</p>
+    <p id="counter" class="text-2xl font-bold text-green-700 mt-2">العدّات: 0</p>
+    <p id="feedback" class="text-xl font-bold mt-2">التغذية الراجعة: جاهز</p>
+</div>
+
+<!-- مكتبات الذكاء الاصطناعي -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+
+<!-- ملف الجافاسكربت -->
+<script src="app.js"></script>
+
+</body>
+</html>

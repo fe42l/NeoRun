@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>المعلومات الشخصية - SmartFit Guard</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- CryptoJS للتشفير -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+</head>
+
+<body class="bg-gray-100 p-6">
+
+<!-- زر العودة -->
+<a href="index.html" 
+   class="fixed top-4 right-4 bg-gradient-to-r from-blue-700 to-purple-700 text-white px-4 py-2 rounded-full shadow-lg hover:opacity-90 flex items-center gap-2 z-50">
+    <i class="fa-solid fa-arrow-right"></i>
+    <span>العودة</span>
+</a>
+
+<!-- اللوقو -->
+<div class="text-center mb-4">
+    <img src="assets/logo.png" class="w-20 mx-auto opacity-90">
+</div>
+
+<h2 class="text-3xl font-bold text-center mb-6 text-blue-800">
+    <i class="fa-solid fa-id-card"></i> المعلومات الشخصية
+</h2>
+
+<!-- صندوق البيانات -->
+<div class="bg-white p-6 rounded-xl shadow max-w-md mx-auto border-t-4 border-blue-700">
+
+    <label class="font-bold">الاسم</label>
+    <input id="name" class="w-full p-3 mb-4 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+
+    <label class="font-bold">العمر</label>
+    <input id="age" type="number" class="w-full p-3 mb-4 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+
+    <label class="font-bold">الطول (سم)</label>
+    <input id="height" type="number" class="w-full p-3 mb-4 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+
+    <label class="font-bold">الوزن (كجم)</label>
+    <input id="weight" type="number" class="w-full p-3 mb-6 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+
+    <button onclick="saveProfile()"
+            class="w-full bg-gradient-to-r from-blue-700 to-purple-700 text-white p-3 rounded-lg shadow hover:opacity-90">
+        حفظ البيانات
+    </button>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
