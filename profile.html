@@ -1,60 +1,153 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <title>المعلومات الشخصية - SmartFit Guard</title>
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-    <!-- CryptoJS للتشفير -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1e40af">
+<title>ملفي الشخصي — NeoRun</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="style.css">
 </head>
+<body>
 
-<body class="bg-gray-100 p-6">
+<main>
+  <h1 class="page-title"><i class="fa-solid fa-id-card" style="color:var(--brand)"></i> ملفي الشخصي</h1>
+  <p class="page-sub">بياناتك مشفّرة بـ AES-256 بمفتاح مشتق من كلمة مرورك.</p>
 
-<!-- زر العودة -->
-<a href="index.html" 
-   class="fixed top-4 right-4 bg-gradient-to-r from-blue-700 to-purple-700 text-white px-4 py-2 rounded-full shadow-lg hover:opacity-90 flex items-center gap-2 z-50">
-    <i class="fa-solid fa-arrow-right"></i>
-    <span>العودة</span>
-</a>
+  <div class="grid grid-2" style="align-items:start">
+    <form id="profile-form" class="card" novalidate>
+      <label for="name">الاسم</label>
+      <input id="name" autocomplete="name" maxlength="40">
 
-<!-- اللوقو -->
-<div class="text-center mb-4">
-    <img src="assets/logo.png" class="w-20 mx-auto opacity-90">
-</div>
+      <div class="grid grid-2" style="gap:0 12px">
+        <div>
+          <label for="age">العمر</label>
+          <input id="age" type="number" inputmode="numeric" min="8" max="100">
+        </div>
+        <div>
+          <label for="gender">الجنس</label>
+          <select id="gender">
+            <option value="">—</option>
+            <option value="f">أنثى</option>
+            <option value="m">ذكر</option>
+          </select>
+        </div>
+        <div>
+          <label for="height">الطول (سم)</label>
+          <input id="height" type="number" inputmode="decimal" min="100" max="230">
+        </div>
+        <div>
+          <label for="weight">الوزن (كجم)</label>
+          <input id="weight" type="number" inputmode="decimal" min="25" max="250" step="0.1">
+        </div>
+      </div>
 
-<h2 class="text-3xl font-bold text-center mb-6 text-blue-800">
-    <i class="fa-solid fa-id-card"></i> المعلومات الشخصية
-</h2>
+      <label for="goal">هدف التكرارات اليومي</label>
+      <input id="goal" type="number" inputmode="numeric" min="1" max="1000" placeholder="مثال: 30">
 
-<!-- صندوق البيانات -->
-<div class="bg-white p-6 rounded-xl shadow max-w-md mx-auto border-t-4 border-blue-700">
+      <button class="btn block" type="submit"><i class="fa-solid fa-lock"></i> حفظ مشفّر</button>
+    </form>
 
-    <label class="font-bold">الاسم</label>
-    <input id="name" class="w-full p-3 mb-4 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+    <div>
+      <div class="card">
+        <h3>مؤشر كتلة الجسم (BMI)</h3>
+        <div id="bmi-empty" class="muted">أدخل الطول والوزن لحساب المؤشر.</div>
+        <div id="bmi-box" class="hidden">
+          <div style="display:flex;align-items:baseline;gap:10px">
+            <span class="rep-big" style="font-size:2.6rem" id="bmi-value">0</span>
+            <span class="badge" id="bmi-label"></span>
+          </div>
+          <div class="bmi-scale" aria-hidden="true">
+            <span style="background:#60a5fa"></span><span style="background:#22c55e"></span>
+            <span style="background:#f59e0b"></span><span style="background:#ef4444"></span>
+          </div>
+          <p class="muted" style="font-size:.85rem;margin:8px 0 0">المؤشر تقديري ولا يغني عن استشارة مختص.</p>
+        </div>
+      </div>
 
-    <label class="font-bold">العمر</label>
-    <input id="age" type="number" class="w-full p-3 mb-4 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+      <div class="card">
+        <h3>تقدّم اليوم</h3>
+        <div style="display:flex;justify-content:space-between"><span id="today-text" class="muted">—</span><b id="today-pct">0%</b></div>
+        <div class="progress"><div id="today-bar"></div></div>
+      </div>
+    </div>
+  </div>
+</main>
 
-    <label class="font-bold">الطول (سم)</label>
-    <input id="height" type="number" class="w-full p-3 mb-4 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+<script src="js/common.js"></script>
+<script>
+(async function () {
+  if (!NR.requireLogin()) return;
+  const $ = (id) => document.getElementById(id);
+  const fields = ["name", "age", "gender", "height", "weight", "goal"];
 
-    <label class="font-bold">الوزن (كجم)</label>
-    <input id="weight" type="number" class="w-full p-3 mb-6 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+  const profile = await NR.loadUserData("profile", {});
+  fields.forEach((f) => { if (profile[f] != null) $(f).value = profile[f]; });
 
-    <button onclick="saveProfile()"
-            class="w-full bg-gradient-to-r from-blue-700 to-purple-700 text-white p-3 rounded-lg shadow hover:opacity-90">
-        حفظ البيانات
-    </button>
+  function updateBMI() {
+    const h = parseFloat($("height").value) / 100;
+    const w = parseFloat($("weight").value);
+    const ok = h > 0.5 && w > 10;
+    $("bmi-empty").classList.toggle("hidden", ok);
+    $("bmi-box").classList.toggle("hidden", !ok);
+    if (!ok) return;
+    const bmi = w / (h * h);
+    $("bmi-value").textContent = bmi.toFixed(1);
+    $("bmi-label").textContent =
+      bmi < 18.5 ? "نقص في الوزن" : bmi < 25 ? "وزن طبيعي" : bmi < 30 ? "زيادة في الوزن" : "سمنة";
+  }
 
-</div>
+  async function updateToday() {
+    const history = await NR.loadUserData("history", []);
+    const start = new Date(); start.setHours(0, 0, 0, 0);
+    const reps = history.filter((h) => h.date >= start.getTime()).reduce((s, h) => s + (h.reps || 0), 0);
+    const goal = parseInt($("goal").value, 10);
+    if (goal > 0) {
+      const pct = Math.min(100, Math.round((reps / goal) * 100));
+      $("today-text").textContent = `${reps} من ${goal} تكرار`;
+      $("today-pct").textContent = pct + "%";
+      $("today-bar").style.width = pct + "%";
+    } else {
+      $("today-text").textContent = `${reps} تكرار اليوم — حدّد هدفاً يومياً`;
+      $("today-pct").textContent = "";
+      $("today-bar").style.width = "0";
+    }
+  }
 
-<script src="app.js"></script>
+  ["height", "weight"].forEach((f) => $(f).addEventListener("input", updateBMI));
+  $("goal").addEventListener("input", updateToday);
+  updateBMI();
+  updateToday();
+
+  $("profile-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const data = {};
+    for (const f of fields) {
+      const el = $(f);
+      if (el.type === "number" && el.value !== "") {
+        const n = Number(el.value);
+        if (!Number.isFinite(n) || (el.min && n < +el.min) || (el.max && n > +el.max)) {
+          NR.toast(`قيمة غير صحيحة في حقل "${el.labels[0].textContent}"`, "bad");
+          el.focus();
+          return;
+        }
+        data[f] = n;
+      } else {
+        data[f] = el.value.trim();
+      }
+    }
+    try {
+      await NR.saveUserData("profile", data);
+      NR.toast("تم حفظ بياناتك بشكل مشفّر", "ok");
+    } catch (ex) {
+      NR.toast("تعذّر الحفظ: " + ex.message, "bad");
+    }
+  });
+})();
+</script>
 </body>
 </html>

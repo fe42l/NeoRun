@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1e40af">
+<title>الخصوصية والأمان — NeoRun</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main>
+  <h1 class="page-title"><i class="fa-solid fa-shield-halved" style="color:var(--brand)"></i> الخصوصية والأمان</h1>
+  <p class="page-sub">صُمّم NeoRun بحيث تبقى بياناتك عندك — Privacy by Design.</p>
+
+  <div class="grid grid-2">
+    <div class="card privacy-card">
+      <div class="icon"><i class="fa-solid fa-microchip"></i></div>
+      <h3>المعالجة داخل جهازك</h3>
+      <p class="muted">تحليل الحركة يتم بنموذج MoveNet داخل المتصفح. الصورة لا تُرسل إلى أي خادم؛ الإنترنت يُستخدم فقط لتحميل المكتبات والنموذج أول مرة.</p>
+    </div>
+
+    <div class="card privacy-card">
+      <div class="icon"><i class="fa-solid fa-lock"></i></div>
+      <h3>تشفير AES-256-GCM</h3>
+      <p class="muted">الملف الشخصي وسجل الجلسات والمقاطع تُشفّر بمفتاح يُشتق من كلمة مرورك (PBKDF2 بـ 210,000 تكرار). بدون كلمة المرور لا يمكن قراءتها — حتى من نفس الجهاز.</p>
+    </div>
+
+    <div class="card privacy-card">
+      <div class="icon"><i class="fa-solid fa-video-slash"></i></div>
+      <h3>لا تسجيل بدون موافقتك</h3>
+      <p class="muted">لا يُحفظ أي مقطع إلا إذا فعّلت خيار التسجيل بنفسك، والحد الأقصى 3 دقائق للجلسة. يمكنك حذف أي مقطع في أي وقت.</p>
+    </div>
+
+    <div class="card privacy-card">
+      <div class="icon"><i class="fa-solid fa-user-secret"></i></div>
+      <h3>بدون تتبّع أو إعلانات</h3>
+      <p class="muted">لا توجد أدوات تحليلات أو ملفات تعريف تتبّع. كلمة المرور نفسها لا تُخزَّن؛ يُخزَّن فقط ناتج تحقّق منها.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3><i class="fa-solid fa-circle-info" style="color:var(--brand)"></i> حدود يجب أن تعرفها</h3>
+    <ul class="muted" style="margin:0;padding-inline-start:20px">
+      <li>البيانات محفوظة في هذا المتصفح فقط؛ مسح بيانات المتصفح يحذفها.</li>
+      <li>لا يمكن استعادة كلمة المرور لأنها مفتاح التشفير.</li>
+      <li>أثناء تسجيل الدخول يبقى مفتاح الجلسة في ذاكرة التبويب حتى تغلقه أو تسجّل الخروج.</li>
+    </ul>
+  </div>
+
+  <div class="card hidden" id="danger" style="margin-top:16px;border-color:var(--bad)">
+    <h3 style="color:var(--bad)"><i class="fa-solid fa-triangle-exclamation"></i> حذف حسابي وكل بياناتي</h3>
+    <p class="muted">يحذف الحساب والملف الشخصي والسجل وكل المقاطع من هذا الجهاز نهائياً.</p>
+    <button class="btn danger" id="wipe"><i class="fa-solid fa-trash"></i> حذف كل شيء</button>
+  </div>
+</main>
+
+<script src="js/common.js"></script>
+<script>
+(function () {
+  if (!NR.currentUser()) return;
+  const danger = document.getElementById("danger");
+  danger.classList.remove("hidden");
+  document.getElementById("wipe").addEventListener("click", async () => {
+    const user = NR.currentUser();
+    const typed = prompt(`للتأكيد اكتب اسم المستخدم: ${user}`);
+    if (typed === null) return;
+    if (typed.trim().toLowerCase() !== user) { NR.toast("الاسم غير مطابق — لم يُحذف شيء", "bad"); return; }
+    await NR.deleteAllUserData();
+    location.href = "index.html";
+  });
+})();
+</script>
+</body>
+</html>
