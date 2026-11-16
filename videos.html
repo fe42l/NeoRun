@@ -1,41 +1,137 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <title>المقاطع المسجّلة - SmartFit Guard</title>
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1e40af">
+<title>السجل والمقاطع — NeoRun</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="style.css">
 </head>
+<body>
 
-<body class="bg-gray-100 p-6">
+<main>
+  <h1 class="page-title"><i class="fa-solid fa-clock-rotate-left" style="color:var(--brand)"></i> السجل والمقاطع</h1>
+  <p class="page-sub">جلساتك السابقة والمقاطع المسجّلة — كلها مشفّرة ومحفوظة في هذا الجهاز فقط.</p>
 
-<!-- زر العودة -->
-<a href="index.html" 
-   class="fixed top-4 right-4 bg-gradient-to-r from-blue-700 to-purple-700 text-white px-4 py-2 rounded-full shadow-lg hover:opacity-90 flex items-center gap-2 z-50">
-    <i class="fa-solid fa-arrow-right"></i>
-    <span>العودة</span>
-</a>
+  <section class="grid stats" aria-label="ملخص">
+    <div class="card stat"><div class="value" id="sum-sessions">0</div><div class="label">جلسة</div></div>
+    <div class="card stat"><div class="value" id="sum-reps">0</div><div class="label">تكرار</div></div>
+    <div class="card stat"><div class="value" id="sum-quality">—</div><div class="label">نسبة الوضعية الصحيحة</div></div>
+  </section>
 
-<!-- اللوقو -->
-<div class="text-center mb-4">
-    <img src="assets/logo.png" class="w-20 mx-auto opacity-90">
-</div>
+  <section class="card" style="margin-top:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <h3 style="margin:0">آخر الجلسات</h3>
+      <button class="btn ghost sm hidden" id="export"><i class="fa-solid fa-file-csv"></i> تصدير CSV</button>
+    </div>
+    <ul class="list" id="history"></ul>
+  </section>
 
-<h2 class="text-3xl font-bold text-center mb-6 text-purple-700">
-    <i class="fa-solid fa-video"></i> المقاطع المسجّلة
-</h2>
+  <h2 style="margin:28px 0 12px;font-size:1.25rem"><i class="fa-solid fa-video" style="color:var(--brand)"></i> المقاطع المسجّلة</h2>
+  <div class="grid grid-3" id="videos"></div>
+</main>
 
-<!-- المحتوى -->
-<div class="bg-white p-6 rounded-xl shadow max-w-xl mx-auto border-t-4 border-purple-600 text-center">
-    <p class="text-gray-600 text-lg">
-        لا توجد مقاطع محفوظة حتى الآن.
-    </p>
-</div>
+<script src="js/common.js"></script>
+<script>
+(async function () {
+  if (!NR.requireLogin()) return;
+  const $ = (id) => document.getElementById(id);
+  const NAMES = { squat: "سكوات", pushup: "ضغط", armraise: "رفع الذراعين" };
+  const urls = [];
 
+  let history = await NR.loadUserData("history", []);
+
+  function renderHistory() {
+    const reps = history.reduce((s, h) => s + (h.reps || 0), 0);
+    const good = history.reduce((s, h) => s + (h.good || 0), 0);
+    $("sum-sessions").textContent = history.length;
+    $("sum-reps").textContent = reps;
+    $("sum-quality").textContent = reps ? Math.round((good / reps) * 100) + "%" : "—";
+    $("export").classList.toggle("hidden", !history.length);
+
+    if (!history.length) {
+      $("history").innerHTML =
+        '<li class="empty" style="display:block"><i class="fa-solid fa-dumbbell"></i>لا توجد جلسات بعد. <a href="camera.html">ابدأ أول تمرين</a></li>';
+      return;
+    }
+    $("history").innerHTML = history.slice(0, 50).map((h) => `
+      <li>
+        <span class="badge">${NR.escapeHtml(NAMES[h.exercise] || h.exercise)}</span>
+        <div class="grow">
+          <b>${h.reps} تكرار</b> <span class="muted">· ${h.good ?? h.reps} صحيح · ${NR.fmtDuration(h.duration)}</span>
+          <div class="meta">${NR.fmtDate(h.date)}${h.video ? ' · <i class="fa-solid fa-video"></i>' : ""}</div>
+        </div>
+        <button class="btn ghost sm" data-del="${NR.escapeHtml(h.id)}" aria-label="حذف الجلسة"><i class="fa-solid fa-trash"></i></button>
+      </li>`).join("");
+  }
+
+  $("history").addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-del]");
+    if (!btn || !confirm("حذف هذه الجلسة من السجل؟")) return;
+    history = history.filter((h) => h.id !== btn.dataset.del);
+    await NR.saveUserData("history", history);
+    renderHistory();
+    NR.toast("تم حذف الجلسة");
+  });
+
+  $("export").addEventListener("click", () => {
+    const rows = [["date", "exercise", "reps", "good_reps", "duration_sec"]].concat(
+      history.map((h) => [new Date(h.date).toISOString(), h.exercise, h.reps, h.good ?? h.reps, h.duration])
+    );
+    const blob = new Blob(["﻿" + rows.map((r) => r.join(",")).join("\n")], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "neorun-history.csv";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  });
+
+  async function renderVideos() {
+    urls.splice(0).forEach((u) => URL.revokeObjectURL(u));
+    let vids = [];
+    try { vids = await NR.listVideos(); } catch (e) { console.error(e); }
+    if (!vids.length) {
+      $("videos").innerHTML =
+        '<div class="card empty" style="grid-column:1/-1"><i class="fa-solid fa-film"></i>لا توجد مقاطع محفوظة. فعّل خيار «سجّل مقطعاً» في صفحة التمرين.</div>';
+      return;
+    }
+    $("videos").innerHTML = "";
+    for (const v of vids) {
+      const card = document.createElement("div");
+      card.className = "card video-card";
+      let src = "";
+      try {
+        src = URL.createObjectURL(await NR.videoBlob(v));
+        urls.push(src);
+      } catch { /* لا يمكن فك التشفير */ }
+      const ext = (v.mime || "").includes("mp4") ? "mp4" : "webm";
+      card.innerHTML = `
+        ${src ? `<video controls preload="metadata" src="${src}"></video>` : '<div class="empty">تعذّر فك تشفير المقطع</div>'}
+        <div class="meta"><span class="badge">${NR.escapeHtml(NAMES[v.exercise] || "")}</span> ${v.reps ?? 0} تكرار · ${NR.fmtDuration(v.duration || 0)}<br>${NR.fmtDate(v.date)}</div>
+        <div class="btn-row">
+          ${src ? `<a class="btn ghost sm" href="${src}" download="neorun-${v.date}.${ext}"><i class="fa-solid fa-download"></i> تنزيل</a>` : ""}
+          <button class="btn ghost sm" data-vdel="${NR.escapeHtml(v.id)}"><i class="fa-solid fa-trash"></i> حذف</button>
+        </div>`;
+      $("videos").appendChild(card);
+    }
+  }
+
+  $("videos").addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-vdel]");
+    if (!btn || !confirm("حذف هذا المقطع نهائياً؟")) return;
+    await NR.deleteVideo(btn.dataset.vdel);
+    NR.toast("تم حذف المقطع");
+    renderVideos();
+  });
+
+  renderHistory();
+  renderVideos();
+})();
+</script>
 </body>
 </html>
